@@ -1,153 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Film Link TV | Admin Upload & Approval</title>
-  <style>
-    :root{--bg:#050505;--panel:#111;--gold:#d4af37;--gold2:#ffe08a;--text:#fff;--muted:#b8b8b8;--line:#303030;--red:#740000;--green:#46d983}
-    *{box-sizing:border-box}
-    body{margin:0;background:radial-gradient(circle at top left,#241000,#050505 35%,#000);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-    header{display:flex;justify-content:space-between;align-items:center;padding:18px 6%;background:#000;border-bottom:1px solid var(--line);position:sticky;top:0}
-    .brand{font-weight:900}.brand span{color:var(--gold)}
-    a{color:inherit;text-decoration:none}
-    .btn{border:0;border-radius:999px;padding:11px 16px;font-weight:900;cursor:pointer}
-    .gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000}
-    .dark{background:#ffffff18;color:#fff;border:1px solid var(--line)}
-    .red{background:var(--red);color:#fff}
-    .green{background:var(--green);color:#000}
-    main{padding:38px 6%}
-    h1{font-size:46px;margin:10px 0}
-    p{color:var(--muted);line-height:1.5}
-    .grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:22px;align-items:start}
-    .panel{background:linear-gradient(180deg,#151515,#080808);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 25px 70px rgba(0,0,0,.4)}
-    input,select,textarea{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#070707;color:white;margin:8px 0}
-    .queue{display:grid;gap:14px}
-    .item{background:#0b0b0b;border:1px solid var(--line);border-radius:18px;padding:16px}
-    .item h3{margin:0 0 6px}
-    .tag{display:inline-block;background:var(--gold);color:#000;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900;margin:3px}
-    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
-    .stat{background:#ffffff10;border:1px solid var(--line);border-radius:16px;padding:16px}
-    .stat strong{display:block;color:var(--gold2);font-size:26px}
-    .notice{border-left:4px solid var(--gold);background:rgba(212,175,55,.08);padding:14px;border-radius:12px}
-    @media(max-width:900px){.grid,.stats{grid-template-columns:1fr}h1{font-size:36px}}
-  </style>
-</head>
-<body>
-<header>
-  <div class="brand"><span>Film Link TV</span> Admin</div>
-  <nav>
-    <a class="btn dark" href="index.html">Back to Site</a>
-  </nav>
-</header>
+<form name="film-submission" method="POST" data-netlify="true">
 
-<main>
-  <span class="tag">Founder / Admin Preview</span>
-  <h1>Upload & Approval Center</h1>
-  <p>This page gives you an easy workflow: submit a film or YouTube link, review it in the pending queue, approve it, reject it, or feature it. This is currently a front-end demo; the next step is connecting it to a real database.</p>
+<input type="hidden" name="form-name" value="film-submission">
 
-  <div class="stats">
-    <div class="stat"><strong id="pendingCount">0</strong><span>Pending</span></div>
-    <div class="stat"><strong id="approvedCount">0</strong><span>Approved</span></div>
-    <div class="stat"><strong id="rejectedCount">0</strong><span>Rejected</span></div>
-  </div>
+<label>Film Title</label><br>
+<input type="text" name="title" required><br><br>
 
-  <div class="grid">
-    <section class="panel">
-      <h2>Add New Film / Trailer</h2>
-      <input id="title" placeholder="Film title"/>
-      <input id="creator" placeholder="Creator / Company"/>
-      <input id="youtube" placeholder="YouTube link or video ID"/>
-      <select id="category">
-        <option>Urban Film</option>
-        <option>Documentary</option>
-        <option>Short Film</option>
-        <option>Web Series</option>
-        <option>Music Video</option>
-        <option>TVL Original</option>
-      </select>
-      <textarea id="synopsis" placeholder="Synopsis / description"></textarea>
-      <button class="btn gold" onclick="addSubmission()">Add to Pending Review</button>
-      <p id="msg"></p>
-      <div class="notice">
-        <b>Rights reminder:</b> Only approve content you own, licensed, or have written permission to embed or stream.
-      </div>
-    </section>
+<label>Creator Name</label><br>
+<input type="text" name="creator" required><br><br>
 
-    <section class="panel">
-      <h2>Pending Approval Queue</h2>
-      <div id="pendingList" class="queue"></div>
-    </section>
-  </div>
+<label>Email</label><br>
+<input type="email" name="email" required><br><br>
 
-  <br/>
+<label>YouTube Trailer Link</label><br>
+<input type="url" name="youtube"><br><br>
 
-  <div class="grid">
-    <section class="panel">
-      <h2>Approved / Live Library</h2>
-      <div id="approvedList" class="queue"></div>
-    </section>
+<label>Synopsis</label><br>
+<textarea name="synopsis"></textarea><br><br>
 
-    <section class="panel">
-      <h2>Rejected / Needs Fixes</h2>
-      <div id="rejectedList" class="queue"></div>
-    </section>
-  </div>
-</main>
+<button type="submit">
+Submit Film
+</button>
 
-<script>
-let submissions = JSON.parse(localStorage.getItem("fltv_submissions") || "[]");
-
-function save(){localStorage.setItem("fltv_submissions", JSON.stringify(submissions)); render();}
-function addSubmission(){
-  const title = document.getElementById("title").value.trim();
-  const creator = document.getElementById("creator").value.trim();
-  const youtube = document.getElementById("youtube").value.trim();
-  const category = document.getElementById("category").value;
-  const synopsis = document.getElementById("synopsis").value.trim();
-  if(!title){document.getElementById("msg").textContent="Add a title first."; return;}
-  submissions.push({id:Date.now(), title, creator, youtube, category, synopsis, status:"pending", featured:false});
-  document.getElementById("title").value="";
-  document.getElementById("creator").value="";
-  document.getElementById("youtube").value="";
-  document.getElementById("synopsis").value="";
-  document.getElementById("msg").textContent="Added to pending review.";
-  save();
-}
-function approve(id){submissions = submissions.map(s=>s.id===id?{...s,status:"approved"}:s); save();}
-function reject(id){submissions = submissions.map(s=>s.id===id?{...s,status:"rejected"}:s); save();}
-function backToPending(id){submissions = submissions.map(s=>s.id===id?{...s,status:"pending"}:s); save();}
-function toggleFeature(id){submissions = submissions.map(s=>s.id===id?{...s,featured:!s.featured}:s); save();}
-function removeItem(id){submissions = submissions.filter(s=>s.id!==id); save();}
-function card(s){
-  return `<div class="item">
-    <h3>${s.title}</h3>
-    <div><span class="tag">${s.category}</span>${s.featured?'<span class="tag">Featured</span>':''}</div>
-    <p><b>Creator:</b> ${s.creator || "Not listed"}</p>
-    <p>${s.synopsis || "No synopsis added."}</p>
-    <p><b>YouTube:</b> ${s.youtube || "No link added"}</p>
-    <div class="actions">
-      ${s.status!=="approved"?`<button class="btn green" onclick="approve(${s.id})">Approve</button>`:""}
-      ${s.status!=="rejected"?`<button class="btn red" onclick="reject(${s.id})">Reject</button>`:""}
-      ${s.status!=="pending"?`<button class="btn dark" onclick="backToPending(${s.id})">Move to Pending</button>`:""}
-      <button class="btn gold" onclick="toggleFeature(${s.id})">${s.featured?"Unfeature":"Feature"}</button>
-      <button class="btn dark" onclick="removeItem(${s.id})">Delete</button>
-    </div>
-  </div>`;
-}
-function render(){
-  const pending = submissions.filter(s=>s.status==="pending");
-  const approved = submissions.filter(s=>s.status==="approved");
-  const rejected = submissions.filter(s=>s.status==="rejected");
-  document.getElementById("pendingCount").textContent=pending.length;
-  document.getElementById("approvedCount").textContent=approved.length;
-  document.getElementById("rejectedCount").textContent=rejected.length;
-  document.getElementById("pendingList").innerHTML=pending.length?pending.map(card).join(""):"<p>No pending submissions.</p>";
-  document.getElementById("approvedList").innerHTML=approved.length?approved.map(card).join(""):"<p>No approved films yet.</p>";
-  document.getElementById("rejectedList").innerHTML=rejected.length?rejected.map(card).join(""):"<p>No rejected items.</p>";
-}
-render();
-</script>
-</body>
-</html>
+</form>
